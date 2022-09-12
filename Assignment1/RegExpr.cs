@@ -6,32 +6,26 @@ public static class RegExpr
 
     public static IEnumerable<string> SplitLine(IEnumerable<string> lines)
     {
-
-        var regex = new Regex(@"(?P<words>\w+)");
-
-        List<string> output = new List<string>();
-
+        Regex regex = new Regex(@"(?<word>\w+)");
         foreach (string line in lines)
         {
             foreach (Match match in regex.Matches(line))
             {
-                yield return (match.Groups["words"].Value);
+                yield return (match.Groups["word"].Value);
             }
         }
 
-        
+
     }
 
     public static IEnumerable<(int width, int height)> Resolution(IEnumerable<string> resolutions)
     {
-
-        var regex = new Regex("(?<width>[0-9]+)x(?<height>[0-9]+)");
-
-        var output = new List<(int width, int height)>();
-
-        foreach(string resolution in resolutions) {
-            foreach(Match match in regex.Matches(resolution)) {
-                var groups = match.Groups;
+        Regex regex = new Regex("(?<width>[0-9]+)x(?<height>[0-9]+)");
+        foreach (string line in resolutions)
+        {
+            foreach (Match match in regex.Matches(line))
+            {
+                GroupCollection groups = match.Groups;
                 yield return (Int32.Parse(groups["width"].Value), Int32.Parse(groups["height"].Value));
             }
         }
@@ -39,19 +33,27 @@ public static class RegExpr
 
     public static IEnumerable<string> InnerText(string html, string tag)
     {
-        var regex = new Regex("<" + tag + @"(?:.| )*?>(?<innerText>(?:\w| )*)<\/" + tag + ">");
-
-        var output = new List<string>();
-
+        Regex regex = new Regex("<" + tag + @"(?:.)*?>(?<innerText>(?:.)*?)<\/" + tag + ">");
         foreach (Match match in regex.Matches(html))
         {
-            yield return (match.Groups["innerText"].Value);
+            yield return (Regex.Replace(match.Groups["innerText"].Value, "<[^>]+>", ""));
         }
-
-       
     }
 
-    IEnumerable<(Uri url, string title)> Urls(string html) {
-        
+    public static IEnumerable<(Uri url, string title)> Urls(string html)
+    {
+        Regex regex = new Regex(@"(?:href=[""'])(?<url>.*?)[""'].*?(?: title=[""'](?<title>.*?)[""'])?.*?>(?<innerText>.*?)<");
+        foreach (Match match in regex.Matches(html))
+        {
+            GroupCollection groups = match.Groups;
+            if (groups["title"].Success)
+            {
+                yield return (new Uri(groups["url"].Value), groups["title"].Value);
+            }
+            else
+            {
+                yield return (new Uri(groups["url"].Value), groups["innerText"].Value);
+            }
+        }
     }
 }
