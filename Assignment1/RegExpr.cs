@@ -1,5 +1,6 @@
 namespace Assignment1;
 using System.Text.RegularExpressions;
+
 public static class RegExpr
 {
 
@@ -21,22 +22,19 @@ public static class RegExpr
         
     }
 
-    public static IEnumerable<(int width, int height)> Resolution(string resolutions)
+    public static IEnumerable<(int width, int height)> Resolution(IEnumerable<string> resolutions)
     {
 
         var regex = new Regex("(?<width>[0-9]+)x(?<height>[0-9]+)");
 
         var output = new List<(int width, int height)>();
 
-        foreach (Match match in regex.Matches(resolutions))
-        {
-            var groups = match.Groups;
-
-           yield return (Int32.Parse(groups["width"].Value), Int32.Parse(groups["height"].Value));
-
+        foreach(string resolution in resolutions) {
+            foreach(Match match in regex.Matches(resolution)) {
+                var groups = match.Groups;
+                yield return (Int32.Parse(groups["width"].Value), Int32.Parse(groups["height"].Value));
+            }
         }
-
-       
     }
 
     public static IEnumerable<string> InnerText(string html, string tag)
@@ -54,6 +52,6 @@ public static class RegExpr
     }
 
     IEnumerable<(Uri url, string title)> Urls(string html) {
-            
+        
     }
 }
